@@ -3,6 +3,7 @@ import App from './App.vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'leaflet/dist/leaflet.css'
+import 'assets/css/default.css'
 import router from './router'
 Vue.config.productionTip = false
 Vue.use(ElementUI)

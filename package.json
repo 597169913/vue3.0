@@ -8,8 +8,20 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "core-js": "^3.4.4",
-    "vue": "^2.6.10"
+    "echarts": "^4.7.0",
+    "element-ui": "^2.13.0",
+    "es6-promise": "^4.2.8",
+    "esri-leaflet": "^2.3.3",
+    "geojson-vt": "^3.2.1",
+    "jquery": "^3.4.1",
+    "leaflet": "^1.6.0",
+    "leaflet-canvas-geojson": "0.0.8",
+    "proj4": "^2.6.1",
+    "vue": "^2.6.10",
+    "vue-router": "^3.1.6",
+    "webpack": "^4.42.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.0",
