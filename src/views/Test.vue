@@ -7,6 +7,7 @@
       <el-button size="small" @click="draw('parallelogram')">平行四边形</el-button>
       <el-button size="small" @click="draw('regularPolygon')">正多边形</el-button>
       <el-button size="small" @click="draw('circle')">圆</el-button>
+      <el-button size="small" @click="draw('ellipse')">椭圆</el-button>
       <el-button size="small" @click="clear">清除</el-button>
     </div>
     <div id="map"></div>
@@ -17,6 +18,7 @@
 <script>
 import L from 'leaflet'
 import MapEvent from 'views/base/MapEvent'
+import Ellipse from './draw/Ellipse'
 // import axios from 'axios'
 // import geojsonvt from 'geojson-vt'
 export default {
@@ -46,6 +48,7 @@ export default {
         case 'rectangle':
         case 'circle':
         case 'parallelogram':
+        case 'ellipse':
           this.mapEvent.addEventHandler('click', this.clickHandler)
           // this.mapEvent.addEventHandler('dbclick', this.dbClickHandler)
           break
@@ -55,7 +58,7 @@ export default {
     clickHandler(evt) {
       const circleMarker = L.circleMarker(evt.latlng, { fillColor: '#fff', weight: 2, fillOpacity: 1, radius: 6 })
       circleMarker.addTo(this.featureGroup)
-      if (this.drawType === 'rectangle' || this.drawType === 'circle' || this.drawType === 'parallelogram') {
+      if (this.drawType === 'rectangle' || this.drawType === 'circle' || this.drawType === 'parallelogram' || this.drawType === 'ellipse') {
         if (this.rectangle || this.circle || this.polygon) {
           this.drop()
         } else {
@@ -77,6 +80,7 @@ export default {
       const points = [...this.clickedPoints]
       points.push(evt.latlng)
       const crs = this.map.options.crs
+      const newPoints = []
       switch (this.drawType) {
         case 'line':
           this.addPolyline(points)
@@ -122,21 +126,29 @@ export default {
             this.addPolyline(points)
           }
           break
-        // case 'regularPolygon':
-        //   const count = this.clickedPoints.length + 2
-        //   const angle = 180 / count
-        //   const newPoints = [...evt.latlng]
-        //   const distance = crs.project(points[0]).distanceTo(crs.project(evt.latlng))
-        //   for(let i = 1;i < count; i++) {
-        //     const
-        //    newPoints.push()
-        //   }
-        //   if (!this.polygon) {
-        //     this.polygon = L.polygon(newPoints, { color: '#f00', weight: 3, fillColor: '#ffffff' }).addTo(this.layerGroup)
-        //   } else {
-        //     this.polygon.setLatLngs(newPoints)
-        //   }
-        //   break
+        case 'regularPolygon':
+          if (this.clickedPoints.length > 0) {
+            const count = this.clickedPoints.length + 2
+            // newPoints.push(evt.latlng)
+            const centerPoint = crs.project(points[0])
+            const point1 = crs.project(evt.latlng)
+            const radius = centerPoint.distanceTo(point1)
+            const startAnagle = (180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x))
+            const step = 360 / count
+            for (let i = 0; i < count; i++) {
+              const angle = -((step * i + startAnagle) * 2 * Math.PI) / 360
+              const disX = centerPoint.x - Math.sin(angle) * radius
+              const disY = centerPoint.y - Math.cos(angle) * radius
+              const newPoint = new L.point(disX, disY)
+              newPoints.push(crs.unproject(newPoint))
+            }
+          }
+          if (!this.polygon) {
+            this.polygon = L.polygon(newPoints, { color: '#f00', weight: 3, fillColor: '#ffffff' }).addTo(this.layerGroup)
+          } else {
+            this.polygon.setLatLngs(newPoints)
+          }
+          break
         case 'circle':
           if (this.startPoint) {
             const p1 = crs.project(points[0])
@@ -147,6 +159,31 @@ export default {
             } else {
               this.circle.setRadius(distance)
             }
+          }
+          break
+        case 'ellipse':
+          if (points.length >= 3) {
+            const centerPoint = crs.project(points[0])
+            const point1 = crs.project(points[1])
+            const point2 = crs.project(points[2])
+            const a = points[0].distanceTo(points[1])
+            const tilt = -(180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x))
+            const deg1 = -(180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
+            const b = points[0].distanceTo(points[2]) * Math.cos(deg1 * Math.PI)
+            if (!this.polygon) {
+              this.polygon = new Ellipse(points[0], [a, b], tilt, { color: '#f00', weight: 3, fillColor: '#ffffff' }).addTo(this.layerGroup)
+            } else {
+              let tilt = 0
+              if (a > b) {
+                tilt = -(180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x))
+              } else {
+                tilt = -(180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
+              }
+              this.polygon.setTilt(tilt)
+              this.polygon.setRadius(a > b ? [a, b] : [b, a])
+            }
+          } else {
+            this.addPolyline(points)
           }
           break
       }

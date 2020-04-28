@@ -18,6 +18,7 @@
     "jquery": "^3.4.1",
     "leaflet": "^1.6.0",
     "leaflet-canvas-geojson": "0.0.8",
+    "leaflet-ellipse": "^0.9.1",
     "proj4": "^2.6.1",
     "vue": "^2.6.10",
     "vue-router": "^3.1.6",
@@ -28,8 +29,8 @@
     "@vue/cli-plugin-eslint": "^4.1.0",
     "@vue/cli-service": "^4.1.0",
     "babel-eslint": "^10.0.3",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.1.2",
     "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
