@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@elfalem/leaflet-curve": "^0.6.0",
+    "@tweenjs/tween.js": "^18.5.0",
     "axios": "^0.19.2",
     "core-js": "^3.4.4",
     "echarts": "^4.7.0",
@@ -32,6 +34,9 @@
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.1.2",
     "vue-template-compiler": "^2.6.10"
+  },
+  "optionalDependencies": {
+    "@tweenjs/tween.js": "^18.5.0"
   },
   "eslintConfig": {
     "root": true,
