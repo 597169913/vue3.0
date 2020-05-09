@@ -19,10 +19,8 @@
 <script>
 import L from 'leaflet'
 import MapEvent from 'views/base/MapEvent'
-import Ellipse from './draw/Ellipse'
+// import Ellipse from './draw/Ellipse'
 import customLayer from './layer/CustomLayer'
-// import axios from 'axios'
-// import geojsonvt from 'geojson-vt'
 import '@elfalem/leaflet-curve'
 import Vector from './draw/Vector'
 export default {
@@ -169,63 +167,63 @@ export default {
         case 'ellipse':
           if (points.length >= 3) {
             const centerPoint = crs.project(points[0])
-            const point1 = crs.project(points[1])
+            // const point1 = crs.project(points[1])
             const point2 = crs.project(points[2])
             const a = points[0].distanceTo(points[1])
-            // const deg1 = 90 - (180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
-            // const b = Math.abs(centerPoint.distanceTo(point2) * Math.cos((deg1 * 2 * Math.PI) / 360))
-            // const canvas = document.createElement('canvas')
-            // canvas.width = 1200
-            // canvas.height = 960
-            // const ctx = canvas.getContext('2d')
-            // const cp = this.map.latLngToContainerPoint(points[0])
-            // const k = 0.5522848
-            // const x = cp.x
-            // const y = cp.y
-            // const ox = a * k // 水平控制点偏移量
-            // const oy = b * k // 垂直控制点偏移量
-            // // 从椭圆的左端点开始顺时针绘制四条三次贝塞尔曲线
-            // ctx.beginPath()
-            // ctx.moveTo(x - a, y)
-            // ctx.bezierCurveTo(x - a, y - oy, x - ox, y - b, x, y - b)
-            // ctx.bezierCurveTo(x + ox, y - b, x + a, y - oy, x + a, y)
-            // ctx.bezierCurveTo(x + a, y + oy, x + ox, y + b, x, y + b)
-            // ctx.bezierCurveTo(x - ox, y + b, x - a, y + oy, x - a, y)
-            // ctx.closePath()
-            // if (!this.canvasLayer) {
-            //   this.canvasLayer = new customLayer({
-            //     container: canvas,
-            //     opacity: 1, // Opacity of the layer.
-            //     visible: true, // Visible of the layer.
-            //     zIndex: 100 // The explicit zIndex of the layer.
-            //   }).addTo(this.layerGroup)
-            // } else {
-            //   this.canvasLayer.setContainer(canvas)
-            // }
-
-            const tilt = Math.abs((180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x)))
-            console.log(tilt)
-            const deg1 = (180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
+            const deg1 = 90 - (180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
             const b = Math.abs(centerPoint.distanceTo(point2) * Math.cos((deg1 * 2 * Math.PI) / 360))
-            let radii = []
-            console.log(b)
-            if (a > b) {
-              radii = [a, b]
+            const canvas = document.createElement('canvas')
+            canvas.width = 1200
+            canvas.height = 960
+            const ctx = canvas.getContext('2d')
+            const cp = this.map.latLngToContainerPoint(points[0])
+            const k = 0.5522848
+            const x = cp.x
+            const y = cp.y
+            const ox = a * k // 水平控制点偏移量
+            const oy = b * k // 垂直控制点偏移量
+            // 从椭圆的左端点开始顺时针绘制四条三次贝塞尔曲线
+            ctx.beginPath()
+            ctx.moveTo(x - a, y)
+            ctx.bezierCurveTo(x - a, y - oy, x - ox, y - b, x, y - b)
+            ctx.bezierCurveTo(x + ox, y - b, x + a, y - oy, x + a, y)
+            ctx.bezierCurveTo(x + a, y + oy, x + ox, y + b, x, y + b)
+            ctx.bezierCurveTo(x - ox, y + b, x - a, y + oy, x - a, y)
+            ctx.closePath()
+            if (!this.canvasLayer) {
+              this.canvasLayer = new customLayer({
+                container: canvas,
+                opacity: 1, // Opacity of the layer.
+                visible: true, // Visible of the layer.
+                zIndex: 100 // The explicit zIndex of the layer.
+              }).addTo(this.layerGroup)
             } else {
-              radii = [b, a]
+              this.canvasLayer.setContainer(canvas)
             }
-            if (!this.polygon) {
-              this.polygon = new Ellipse(points[0], radii, 0, { color: '#f00', weight: 3, fillColor: '#ffffff' }).addTo(this.layerGroup)
-            } else {
-              // let tilt = 0
-              // if (a > b) {
-              //   tilt = -(180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x))
-              // } else {
-              //   tilt = -(180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
-              // }
-              // this.polygon.setTilt(tilt)
-              this.polygon.setRadius(radii)
-            }
+
+            // const tilt = Math.abs((180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x)))
+            // console.log(tilt)
+            // const deg1 = (180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
+            // const b = Math.abs(centerPoint.distanceTo(point2) * Math.cos((deg1 * 2 * Math.PI) / 360))
+            // let radii = []
+            // console.log(b)
+            // if (a > b) {
+            //   radii = [a, b]
+            // } else {
+            //   radii = [b, a]
+            // }
+            // if (!this.polygon) {
+            //   this.polygon = new Ellipse(points[0], radii, 0, { color: '#f00', weight: 3, fillColor: '#ffffff' }).addTo(this.layerGroup)
+            // } else {
+            //   // let tilt = 0
+            //   // if (a > b) {
+            //   //   tilt = -(180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x))
+            //   // } else {
+            //   //   tilt = -(180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
+            //   // }
+            //   // this.polygon.setTilt(tilt)
+            //   this.polygon.setRadius(radii)
+            // }
           } else {
             this.addPolyline(points, this.featureGroup)
           }
@@ -238,34 +236,7 @@ export default {
             canvas.height = 960
             const ctx = canvas.getContext('2d')
             // const cp = this.map.latLngToContainerPoint(points[0])
-            const newPs = points.map(val => this.map.latLngToContainerPoint(val))
-            const controlPoints = this.getControlPoints(newPs)
-            ctx.lineWidth = 5
-            ctx.strokeStyle = 'yellow'
-            ctx.beginPath()
-            const len = newPs.length
-            let int = 0
-            for (let i = 0; i < len - 1; i++) {
-              ctx.moveTo(newPs[i].x, newPs[i].y)
-              const p = newPs[i + 1]
-              // let cp1 = controlPoints[i * 2]
-              // let cp2 = controlPoints[i * 2 + 1]
-              // ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y)
-              let cp1
-              let cp2
-              if (i === 0) {
-                ctx.quadraticCurveTo(controlPoints[0].x, controlPoints[0].y, p.x, p.y)
-                int++
-              } else if (i < len - 2) {
-                cp1 = controlPoints[int]
-                cp2 = controlPoints[int + 1]
-                ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y)
-                int += 2
-              } else if (i === len - 2) {
-                ctx.quadraticCurveTo(controlPoints[controlPoints.length - 1].x, controlPoints[controlPoints.length - 1].y, newPs[newPs.length - 1].x, newPs[newPs.length - 1].y)
-              }
-            }
-            ctx.stroke()
+            this.drawBezier(ctx, points)
             if (!this.canvasLayer) {
               this.canvasLayer = new customLayer({
                 container: canvas,
@@ -288,6 +259,36 @@ export default {
       } else {
         this.polyline.setLatLngs(points)
       }
+    },
+    drawBezier(ctx, points) {
+      const newPs = points.map(val => this.map.latLngToContainerPoint(val))
+      const controlPoints = this.getControlPoints(newPs)
+      ctx.lineWidth = 3
+      ctx.strokeStyle = 'red'
+      ctx.beginPath()
+      const len = newPs.length
+      let int = 0
+      for (let i = 0; i < len - 1; i++) {
+        ctx.moveTo(newPs[i].x, newPs[i].y)
+        const p = newPs[i + 1]
+        // let cp1 = controlPoints[i * 2]
+        // let cp2 = controlPoints[i * 2 + 1]
+        // ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y)
+        let cp1
+        let cp2
+        if (i === 0) {
+          ctx.quadraticCurveTo(controlPoints[0].x, controlPoints[0].y, p.x, p.y)
+          int++
+        } else if (i < len - 2) {
+          cp1 = controlPoints[int]
+          cp2 = controlPoints[int + 1]
+          ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y)
+          int += 2
+        } else if (i === len - 2) {
+          ctx.quadraticCurveTo(controlPoints[controlPoints.length - 1].x, controlPoints[controlPoints.length - 1].y, newPs[newPs.length - 1].x, newPs[newPs.length - 1].y)
+        }
+      }
+      ctx.stroke()
     },
     getControlPoints(points) {
       const rt = 0.333
