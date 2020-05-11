@@ -126,15 +126,18 @@ const CustomLayer = L.Layer.extend({
     this._reset();
   },
 
-  _onLayerAnimZoom(ev) {
-    this._updateTransform(ev.center, ev.zoom);
+  _onLayerAnimZoom() {
+    // this._updateTransform(ev.center, ev.zoom);
   },
 
   _onLayerZoom() {
     this._updateTransform(this._map.getCenter(), this._map.getZoom());
+    this._redrawCanvas()
   },
 
-  _onLayerZoomEnd() { },
+  _onLayerZoomEnd() {
+    // this._redrawCanvas()
+  },
 
   _onLayerMoveEnd() {
     if (!this._isZoomVisible()) {
@@ -143,6 +146,7 @@ const CustomLayer = L.Layer.extend({
     }
 
     this._update();
+    this._redrawCanvas()
   },
 
   _onZoomVisible() {
@@ -161,7 +165,7 @@ const CustomLayer = L.Layer.extend({
     L.DomUtil.addClass(container, "leaflet-layer");
 
     if (this._zoomAnimated) {
-      L.DomUtil.addClass(this._container, "leaflet-zoom-animated");
+      L.DomUtil.addClass(this._container, "leaflet-zoom-animated-canvas");
     }
   },
 
@@ -208,7 +212,8 @@ const CustomLayer = L.Layer.extend({
   _updateTransform(center, zoom) {
     const scale = this._map.getZoomScale(zoom, this._zoom);
     const position = L.DomUtil.getPosition(this._container);
-    const viewHalf = this._map.getSize().multiplyBy(0.5 + this.options.padding);
+    const view = this._map.getSize().multiplyBy(0.5 + this.options.padding)
+    const viewHalf = this._map.containerPointToLayerPoint(view);
     const currentCenterPoint = this._map.project(this._center, zoom);
     const destCenterPoint = this._map.project(center, zoom);
     const centerOffset = destCenterPoint.subtract(currentCenterPoint);
@@ -261,6 +266,15 @@ const CustomLayer = L.Layer.extend({
   _reset() {
     this._update();
     this._updateTransform(this._center, this._zoom);
+  },
+  _redrawCanvas() {
+    if (this._container.tagName === 'CANVAS') {
+      const context = this._container.getContext('2d');
+      context.clearRect(0, 0, this._container.width, this._container.height);
+      if (typeof this.options.redrawCanvas === 'function') {
+        this.options.redrawCanvas(context)
+      }
+    }
   },
 
   /**

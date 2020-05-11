@@ -27,31 +27,31 @@ export default {
     const myRenderer = L.canvas({ padding: 0.5 })
     const marker = L.circle([34.2212, 113.8196], { renderer: myRenderer })
     marker.addTo(map)
-    const marker2 = L.circle([35.2212, 113.8196], { renderer: myRenderer })
+    const marker2 = L.circle([35.2212, 113.8196], { renderer: myRenderer, radius: 30000 })
     marker2.addTo(map)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: ''
     }).addTo(map)
     this.map = map
-    var path = L.curve(
-      [
-        'M',
-        [50.54136296522163, 28.520507812500004],
-        'Q',
-        [52.214338608258224, 28.564453125000004],
-        [48.45835188280866, 33.57421875000001],
-        [50.680797145321655, 33.83789062500001],
-        'V',
-        [48.40003249610685],
-        'L',
-        [47.45839225859763, 31.201171875],
-        [48.40003249610685, 28.564453125000004],
-        'Z'
-      ],
-      { color: 'red', fill: true }
-    ).addTo(map)
-    this.map.flyToBounds(path.getBounds())
+    // var path = L.curve(
+    //   [
+    //     'M',
+    //     [50.54136296522163, 28.520507812500004],
+    //     'Q',
+    //     [52.214338608258224, 28.564453125000004],
+    //     [48.45835188280866, 33.57421875000001],
+    //     [50.680797145321655, 33.83789062500001],
+    //     'V',
+    //     [48.40003249610685],
+    //     'L',
+    //     [47.45839225859763, 31.201171875],
+    //     [48.40003249610685, 28.564453125000004],
+    //     'Z'
+    //   ],
+    //   { color: 'red', fill: true }
+    // ).addTo(map)
+    // this.map.flyToBounds(path.getBounds())
     // const image = new Image()
     // image.src = '/grass.jpg'
     // image.onload = () => {

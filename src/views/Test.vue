@@ -9,10 +9,10 @@
       <el-button size="small" @click="draw('circle')">圆</el-button>
       <el-button size="small" @click="draw('ellipse')">椭圆</el-button>
       <el-button size="small" @click="draw('bezier')">贝塞尔曲线</el-button>
+      <el-button size="small" @click="draw('commonArrow')">普通箭头</el-button>
       <el-button size="small" @click="clear">清除</el-button>
     </div>
     <div id="map"></div>
-    <canvas id="canvas"></canvas>
   </div>
 </template>
 
@@ -52,6 +52,7 @@ export default {
         case 'circle':
         case 'parallelogram':
         case 'ellipse':
+        case 'commonArrow':
           this.mapEvent.addEventHandler('click', this.clickHandler)
           // this.mapEvent.addEventHandler('dbclick', this.dbClickHandler)
           break
@@ -61,8 +62,9 @@ export default {
     clickHandler(evt) {
       const circleMarker = L.circleMarker(evt.latlng, { fillColor: '#fff', weight: 2, fillOpacity: 1, radius: 6 })
       circleMarker.addTo(this.featureGroup)
-      if (this.drawType === 'rectangle' || this.drawType === 'circle' || this.drawType === 'parallelogram' || this.drawType === 'ellipse') {
-        if (this.rectangle || this.circle || this.polygon) {
+      const drawTypes = ['rectangle', 'circle', 'parallelogram', 'ellipse', 'commonArrow']
+      if (drawTypes.includes(this.drawType)) {
+        if (this.rectangle || this.circle || this.polygon || this.canvasLayer) {
           this.drop()
         } else {
           this.startPoint = evt.latlng
@@ -200,30 +202,6 @@ export default {
             } else {
               this.canvasLayer.setContainer(canvas)
             }
-
-            // const tilt = Math.abs((180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x)))
-            // console.log(tilt)
-            // const deg1 = (180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
-            // const b = Math.abs(centerPoint.distanceTo(point2) * Math.cos((deg1 * 2 * Math.PI) / 360))
-            // let radii = []
-            // console.log(b)
-            // if (a > b) {
-            //   radii = [a, b]
-            // } else {
-            //   radii = [b, a]
-            // }
-            // if (!this.polygon) {
-            //   this.polygon = new Ellipse(points[0], radii, 0, { color: '#f00', weight: 3, fillColor: '#ffffff' }).addTo(this.layerGroup)
-            // } else {
-            //   // let tilt = 0
-            //   // if (a > b) {
-            //   //   tilt = -(180 / Math.PI) * Math.atan((point1.y - centerPoint.y) / (point1.x - centerPoint.x))
-            //   // } else {
-            //   //   tilt = -(180 / Math.PI) * Math.atan((point2.y - centerPoint.y) / (point2.x - centerPoint.x))
-            //   // }
-            //   // this.polygon.setTilt(tilt)
-            //   this.polygon.setRadius(radii)
-            // }
           } else {
             this.addPolyline(points, this.featureGroup)
           }
@@ -232,11 +210,39 @@ export default {
           if (points.length >= 3) {
             this.featureGroup.removeLayer(this.polyline)
             const canvas = document.createElement('canvas')
-            canvas.width = 1200
-            canvas.height = 960
+            canvas.width = 1000
+            canvas.height = 800
             const ctx = canvas.getContext('2d')
-            // const cp = this.map.latLngToContainerPoint(points[0])
             this.drawBezier(ctx, points)
+            if (!this.canvasLayer) {
+              this.canvasLayer = new customLayer({
+                container: canvas,
+                redrawCanvas: context => this.drawBezier(context, this.clickedPoints),
+                opacity: 1, // Opacity of the layer.
+                visible: true, // Visible of the layer.
+                zIndex: 100 // The explicit zIndex of the layer.
+              }).addTo(this.layerGroup)
+            } else {
+              this.canvasLayer.setContainer(canvas)
+            }
+          } else {
+            this.addPolyline(points, this.featureGroup)
+          }
+          break
+        case 'commonArrow':
+          if (this.clickedPoints.length > 0) {
+            const newPs = points.map(val => this.map.latLngToLayerPoint(val))
+            const canvas = document.createElement('canvas')
+            canvas.width = 1000
+            canvas.height = 800
+            const ctx = canvas.getContext('2d')
+            ctx.lineWidth = 3
+            ctx.strokeStyle = 'red'
+            ctx.beginPath()
+            ctx.moveTo(newPs[0].x, newPs[0].y)
+            ctx.lineTo(newPs[1].x, newPs[1].y)
+            ctx.closePath()
+            ctx.stroke()
             if (!this.canvasLayer) {
               this.canvasLayer = new customLayer({
                 container: canvas,
@@ -247,8 +253,6 @@ export default {
             } else {
               this.canvasLayer.setContainer(canvas)
             }
-          } else {
-            this.addPolyline(points, this.featureGroup)
           }
           break
       }
