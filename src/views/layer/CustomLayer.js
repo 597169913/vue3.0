@@ -6,7 +6,7 @@ import L from "leaflet";
  *
  * Leaflet overlay plugin: L.CustomLayer - fully custom Layer.
  */
-const CustomLayer = L.Layer.extend({
+const CanvasLayer = L.Layer.extend({
   // CustomLayer options
   options: {
     // How much to extend the clip area around the map view (relative to its size)
@@ -75,8 +75,6 @@ const CustomLayer = L.Layer.extend({
   },
 
   onAdd() {
-    this.fire("layer-beforemount"); // Lifecycle beforeMount
-
     if (!this._container) {
       this._initContainer(); // defined by renderer implementations
     }
@@ -84,21 +82,7 @@ const CustomLayer = L.Layer.extend({
     this.setOpacity(this.options.opacity);
 
     if (window.isNaN(this.options.zIndex)) {
-      switch (this._container.tagName) {
-        // http://www.w3.org/1999/xhtml
-        case "CANVAS": {
-          this.setZIndex(100);
-          break;
-        }
-        // http://www.w3.org/2000/svg
-        case "svg": {
-          this.setZIndex(200);
-          break;
-        }
-        default: {
-          this.setZIndex(100);
-        }
-      }
+      this.setZIndex(100);
     } else {
       this.setZIndex(this.options.zIndex);
     }
@@ -107,23 +91,16 @@ const CustomLayer = L.Layer.extend({
 
     this._onZoomVisible();
 
-    this.fire("layer-mounted"); // Lifecycle mounted
-
     this._update();
   },
 
   onRemove() {
-    this.fire("layer-beforedestroy"); // Lifecycle beforeDestroy
-
     this._destroyContainer();
-
-    this.fire("layer-destroyed"); // Lifecycle destroyed
   },
-
-  /* Built-in Events */
 
   _onLayerViewReset() {
     this._reset();
+    this._requestRedraw()
   },
 
   _onLayerAnimZoom() {
@@ -132,11 +109,11 @@ const CustomLayer = L.Layer.extend({
 
   _onLayerZoom() {
     this._updateTransform(this._map.getCenter(), this._map.getZoom());
-    this._redrawCanvas()
+    // this._redrawCanvas()
   },
 
   _onLayerZoomEnd() {
-    // this._redrawCanvas()
+    this._requestRedraw()
   },
 
   _onLayerMoveEnd() {
@@ -146,7 +123,7 @@ const CustomLayer = L.Layer.extend({
     }
 
     this._update();
-    this._redrawCanvas()
+    this._requestRedraw()
   },
 
   _onZoomVisible() {
@@ -160,17 +137,23 @@ const CustomLayer = L.Layer.extend({
   /* Built-in Methods */
 
   _initContainer() {
-    const container = (this._container = this.options.container);
-
+    const container = document.createElement('canvas')
+    const size = this._map.getSize();
+    container.width = size.x
+    container.height = size.y
     L.DomUtil.addClass(container, "leaflet-layer");
-
+    this._container = container
     if (this._zoomAnimated) {
       L.DomUtil.addClass(this._container, "leaflet-zoom-animated-canvas");
     }
+    this._ctx = container.getContext('2d');
   },
 
   _destroyContainer() {
+    L.Util.cancelAnimFrame(this._redrawRequest)
+    this._redrawRequest = null
     L.DomUtil.remove(this._container);
+    delete this._ctx;
     delete this._container;
   },
 
@@ -194,9 +177,6 @@ const CustomLayer = L.Layer.extend({
     this._map.on(this.getEvents(), this);
 
     this.getContainer().style.display = "";
-
-    // Subsequent moveend events take the place of update
-    // this._update();
   },
 
   _zoomHide() {
@@ -241,23 +221,16 @@ const CustomLayer = L.Layer.extend({
     let container = this._container;
 
     L.DomUtil.setPosition(container, b.min);
-
-    this.fire("layer-render"); // Lifecycle render
   },
   __update() {
     // Update pixel bounds of renderer container (for positioning/sizing/clipping later)
     // Subclasses are responsible of firing the 'update' event.
     const p = this.options.padding;
     const size = this._map.getSize();
-    const min = this._map.containerPointToLayerPoint(size.multiplyBy(-p));
+    const min = this._map.containerPointToLayerPoint(size.multiplyBy(-p)).round();
 
     this._padding = size.multiplyBy(p);
-
-    // this._bounds = new L.Bounds(
-    //   min.round(),
-    //   min.add(size.multiplyBy(1 + p * 2)).round()
-    // );
-    this._bounds = new L.Bounds(min, min.add(size.multiplyBy(1 + p * 2)));
+    this._bounds = new L.Bounds(min, min.add(size.multiplyBy(1 + p * 2)).round());
 
     this._center = this._map.getCenter();
     this._zoom = this._map.getZoom();
@@ -267,66 +240,20 @@ const CustomLayer = L.Layer.extend({
     this._update();
     this._updateTransform(this._center, this._zoom);
   },
-  _redrawCanvas() {
-    if (this._container.tagName === 'CANVAS') {
-      const context = this._container.getContext('2d');
-      context.clearRect(0, 0, this._container.width, this._container.height);
-      if (typeof this.options.redrawCanvas === 'function') {
-        this.options.redrawCanvas(context)
-      }
-    }
+  _requestRedraw() {
+    this._redrawRequest = this._redrawRequest || L.Util.requestAnimFrame(this._redrawCanvas, this)
   },
-
-  /**
-   * API
-   */
-
-  /* Methods */
-
+  _redrawCanvas() {
+    // if (this._container.tagName === 'CANVAS') {
+    //   const context = this._container.getContext('2d');
+    //   context.clearRect(0, 0, this._container.width, this._container.height);
+    //   if (typeof this.options.redrawCanvas === 'function') {
+    //     this.options.redrawCanvas(context)
+    //   }
+    // }
+  },
   getContainer() {
     return this._container;
-  },
-
-  setContainer(newContainer) {
-    const old = this.getContainer();
-    const parent = old.parentNode;
-
-    delete this._container;
-    this.options.container = newContainer;
-
-    if (!this._container) {
-      this._initContainer();
-    }
-
-    this.setOpacity(this.options.opacity);
-
-    if (window.isNaN(this.options.zIndex)) {
-      switch (this._container.tagName) {
-        case "CANVAS": {
-          this.setZIndex(100);
-          break;
-        }
-        case "svg": {
-          this.setZIndex(200);
-          break;
-        }
-        default: {
-          this.setZIndex(100);
-        }
-      }
-    } else {
-      this.setZIndex(this.options.zIndex);
-    }
-
-    if (parent) {
-      parent.replaceChild(newContainer, old);
-    } else {
-      this.getPane().appendChild(newContainer);
-    }
-
-    this._update();
-
-    return this;
   },
 
   getOpacity() {
@@ -379,76 +306,18 @@ const CustomLayer = L.Layer.extend({
     const container = this.getContainer();
     const size = this._bounds.getSize();
     const padding = this._padding;
+    const dpr = L.Browser.retina ? 2 : 1;
+    container.width = dpr * size.x;
+    container.height = dpr * size.y;
+    container.style.width = size.x + "px";
+    container.style.height = size.y + "px";
 
-    switch (container.tagName) {
-      case "CANVAS": {
-        const dpr = L.Browser.retina ? 2 : 1;
-        container.width = dpr * size.x;
-        container.height = dpr * size.y;
-        container.style.width = size.x + "px";
-        container.style.height = size.y + "px";
+    const ctx = container.getContext("2d");
+    if (L.Browser.retina) ctx.scale(dpr, dpr);
+    ctx.translate(padding.x, padding.y);
 
-        const ctx = container.getContext("2d");
-        if (L.Browser.retina) ctx.scale(dpr, dpr);
-        ctx.translate(padding.x, padding.y);
-
-        return { container, ctx, dpr };
-      }
-      case "svg": {
-        container.setAttribute("width", size.x);
-        container.setAttribute("height", size.y);
-        container.style.width = size.x + "px";
-        container.style.height = size.y + "px";
-        container.setAttribute(
-          "viewBox",
-          `${-padding.x} ${-padding.y} ${size.x} ${size.y}`
-        );
-
-        return { container };
-      }
-      case "DIV": {
-        container.style.boxSizing = "content-box";
-        container.style.width = size.x - padding.x + "px";
-        container.style.height = size.y - padding.y + "px";
-        container.style.padding = `${padding.y}px ${padding.x}px`;
-
-        return { container };
-      }
-      default: {
-        container.setAttribute("width", size.x);
-        container.setAttribute("height", size.y);
-        container.style.width = size.x + "px";
-        container.style.height = size.y + "px";
-        return { container };
-      }
-    }
+    return { container, ctx, dpr };
   }
-
-  /* Events */
-  // on("layer-beforemount", fn);
-  // on("layer-mounted", fn);
-  // on("layer-render", fn);
-  // on("layer-beforedestroy", fn);
-  // on("layer-destroyed", fn);
 });
 
-// @factory L.customLayer(options?: Renderer options)
-// Creates a CustomLayer renderer with the given options.
-function customLayer(options) {
-  return L.customLayer ? new CustomLayer(options) : null;
-}
-
-/**
- * Plugin Props
- */
-
-L.CustomLayer = CustomLayer;
-L.customLayer = customLayer;
-
-/**
- * Exports
- */
-
-export { CustomLayer };
-export { customLayer };
-export default customLayer;
+export default CanvasLayer;

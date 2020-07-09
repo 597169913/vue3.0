@@ -25,7 +25,15 @@ export default {
   mounted() {
     const map = L.map('map').setView([34.2212, 113.8196], 5)
     const myRenderer = L.canvas({ padding: 0.5 })
-    const marker = L.circle([34.2212, 113.8196], { renderer: myRenderer })
+    console.log(L.Path)
+    const marker = L.polyline(
+      [
+        [34.2212, 113.8196],
+        [35.2212, 113.8196],
+        [35.9512, 114.8196]
+      ],
+      { renderer: myRenderer, color: 'yellow' }
+    )
     marker.addTo(map)
     const marker2 = L.circle([35.2212, 113.8196], { renderer: myRenderer, radius: 30000 })
     marker2.addTo(map)
