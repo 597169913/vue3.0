@@ -17,7 +17,7 @@
     "es6-promise": "^4.2.8",
     "esri-leaflet": "^2.3.3",
     "geojson-vt": "^3.2.1",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "leaflet": "^1.6.0",
     "leaflet-canvas-geojson": "0.0.8",
     "leaflet-ellipse": "^0.9.1",
