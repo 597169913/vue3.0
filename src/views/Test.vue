@@ -20,10 +20,11 @@
 import L from 'leaflet'
 import MapEvent from 'views/base/MapEvent'
 // import Ellipse from './draw/Ellipse'
-import CanvasLayer from './layer/CustomLayer'
-import '@elfalem/leaflet-curve'
+// import CanvasLayer from './layer/CustomLayer'
+// import '@elfalem/leaflet-curve'
 // import Vector from './draw/Vector'
-import Curve from './draw/Curve'
+// import Curve from './draw/Curve'
+import CanvasLayer from './layer/CanvasLayer'
 export default {
   props: {
     msg: String
@@ -48,6 +49,7 @@ export default {
         case 'bezier':
           this.mapEvent.addEventHandler('click', this.clickHandler)
           this.mapEvent.addEventHandler('dblclick', this.dbClickHandler)
+          this.guid = this.getGuid()
           break
         case 'rectangle':
         case 'circle':
@@ -211,14 +213,13 @@ export default {
           if (points.length >= 3) {
             this.featureGroup.removeLayer(this.polyline)
             if (!this.canvasLayer) {
-              this.canvasLayer = new Curve({
-                points: points,
+              this.canvasLayer = new CanvasLayer({
                 opacity: 1, // Opacity of the layer.
                 visible: true, // Visible of the layer.
                 zIndex: 100 // The explicit zIndex of the layer.
-              }).addTo(this.layerGroup)
+              }).addTo(this.map)
             } else {
-              this.canvasLayer._setPoints(points)
+              this.canvasLayer.setPoints(points)
             }
           } else {
             this.addPolyline(points, this.featureGroup)
@@ -252,6 +253,12 @@ export default {
           break
       }
     },
+  getGuid() {
+    const S4 = () => {
+      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    }
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+  },
     addPolyline(points, groupLayer) {
       if (!this.polyline) {
         this.polyline = L.polyline(points, { color: '#f00', weight: 3, renderer: this.myRenderer }).addTo(groupLayer)
@@ -264,7 +271,7 @@ export default {
     // },
     dbClickHandler() {
       this.clickedPoints.pop()
-      this.canvasLayer._setPoints(this.clickedPoints)
+      // this.canvasLayer._setPoints(this.clickedPoints)
       this.drop()
     },
     drop() {
