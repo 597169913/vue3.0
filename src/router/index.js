@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import test from '../views/Test'
 import HelloWorld from '../components/HelloWorld'
+import calendar from '../views/calendar/calendarIndex'
 Vue.use(Router)
 export const appRounter = [
   {
@@ -11,6 +12,10 @@ export const appRounter = [
   {
     path: '/hello',
     component: HelloWorld
+  },
+  {
+    path: '/calendar',
+    component: calendar
   },
 ]
 export default new Router({ routes: appRounter })
