@@ -5,6 +5,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 import 'leaflet/dist/leaflet.css'
 import 'assets/css/default.css'
 import router from './router'
+// import 'bootstrap/dist/css/bootstrap.css'
+// import '@fortawesome/fontawesome-free/css/all.css'
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 new Vue({

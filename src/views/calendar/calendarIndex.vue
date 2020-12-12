@@ -1,7 +1,7 @@
 <template>
   <div class="calender-home" :style="{height: height+ 'px'}">
     <FullCalendar :options="calendarOptions" />
-    <!-- <day-setting-dialog></day-setting-dialog> -->
+    <day-setting-dialog ref="settingDialog"></day-setting-dialog>
   </div>
 </template>
 <script>
@@ -10,12 +10,13 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import moment from 'moment'
-// import DaySettingDialog from './DaySettingDialog'
+import DaySettingDialog from './DaySettingDialog'
+// import bootstrapPlugin from '@fullcalendar/bootstrap'
 
 export default {
   components: {
-    FullCalendar // make the <FullCalendar> tag available
-    //DaySettingDialog
+    FullCalendar, // make the <FullCalendar> tag available
+    DaySettingDialog
   },
   data() {
     return {
@@ -23,8 +24,13 @@ export default {
       calendarOptions: {
         height: document.documentElement.clientHeight - 300,
         locale: 'zh-cn',
-        themeSystem: 'bootstrap',
-        plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin],
+        // themeSystem: 'bootstrap',
+        plugins: [
+          dayGridPlugin,
+          interactionPlugin,
+          timeGridPlugin
+          // bootstrapPlugin
+        ],
         initialView: 'dayGridMonth',
         headerToolbar: {
           // 日历头部按钮位置
@@ -33,7 +39,7 @@ export default {
           right: 'today dayGridMonth,timeGridWeek,timeGridDay'
         },
         footerToolbar: {
-          center: 'custom1 custom2'
+          center: 'custom1 custom2 custom3 custom4'
         },
         firstDay: 1,
         eventColor: '#3BB2E3',
@@ -65,6 +71,18 @@ export default {
             click: () => {
               alert('clicked the custom2 button!')
             }
+          },
+          custom3: {
+            text: '设置节假日',
+            click: () => {
+              alert('clicked the custom3 button!')
+            }
+          },
+          custom4: {
+            text: '设置周末',
+            click: () => {
+              alert('clicked the custom4 button!')
+            }
           }
         },
         selectMinDistance: 0,
@@ -75,7 +93,10 @@ export default {
         weekends: true,
         select: this.handleDateSelect,
         eventClick: this.handleEventClick,
-        eventsSet: this.handleEvents
+        eventsSet: this.handleEvents,
+        eventRender: this.handleEventRender,
+        eventChange: this.handleEventChange,
+        eventContent: this.handleEventContent
       },
       eventSources: {}
     }
@@ -85,52 +106,43 @@ export default {
       alert('触发dayClick事件！')
     },
     handleDateSelect(selectInfo) {
-      let title = prompt('Please enter a new title for your event')
+      // let title = prompt('Please enter a new title for your event')
       let calendarApi = selectInfo.view.calendar
-
       calendarApi.unselect() // clear date selection
+      this.$refs.settingDialog.show(calendarApi, selectInfo)
+    },
 
-      if (title) {
-        calendarApi.addEvent({
-          id: this.getGuid(),
-          title,
-          start: selectInfo.startStr,
-          end: selectInfo.endStr,
-          allDay: selectInfo.allDay,
-          className: 'holiday',
-          color: 'red'
-        })
-      }
-    },
-    getGuid() {
-      const S4 = () =>
-        (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
-      return (
-        S4() +
-        S4() +
-        '-' +
-        S4() +
-        '-' +
-        S4() +
-        '-' +
-        S4() +
-        '-' +
-        S4() +
-        S4() +
-        S4()
-      )
-    },
     handleEventClick(clickInfo) {
-      if (
-        confirm(
-          `Are you sure you want to delete the event '${clickInfo.event.title}'`
-        )
-      ) {
-        clickInfo.event.remove()
-      }
+      // if (
+      //   confirm(
+      //     `Are you sure you want to delete the event '${clickInfo.event.title}'`
+      //   )
+      // ) {
+      //   clickInfo.event.remove()
+      // }
+      this.$refs.settingDialog.edit(clickInfo)
+    },
+    handleEventRender(event, element) {
+      element.qtip({
+        content: event.description
+      })
     },
     handleEvents(events) {
       this.currentEvents = events
+    },
+    handleEventChange(event) {
+      console.log(event)
+    },
+    handleEventContent(arg) {
+      const italicEl = document.createElement('span')
+      italicEl.innerHTML = arg.event._def.title
+      const italicEl1 = document.createElement('span')
+      italicEl1.className = 'delete-btn'
+      italicEl1.innerHTML = '删除'
+      const arrayOfDomNodes = [italicEl, italicEl1]
+      return {
+        domNodes: arrayOfDomNodes
+      }
     }
   }
 }
@@ -140,5 +152,11 @@ export default {
   width: 80%;
   margin: 0 auto;
   height: 80%;
+}
+</style>
+<style>
+.delete-btn {
+  position: absolute;
+  right: 10px;
 }
 </style>
