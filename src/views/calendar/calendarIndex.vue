@@ -25,7 +25,7 @@ export default {
     return {
       height: document.documentElement.clientHeight - 300,
       calendarOptions: {
-        height: document.documentElement.clientHeight - 300,
+        height: document.documentElement.clientHeight - 100,
         locale: 'zh-cn',
         // themeSystem: 'bootstrap',
         plugins: [
@@ -46,7 +46,7 @@ export default {
         },
         firstDay: 0, // 设置一周中显示的第一天是哪天，周日是0，周一是1，类推。,
         eventColor: '#3BB2E3',
-        aspectRatio: 1,
+        // aspectRatio: 1,
         initialDate: moment().format('YYYY-MM-DD'),
         eventLimit: true,
         buttonText: {
@@ -97,13 +97,14 @@ export default {
               //   html: `<a class="fc-daygrid-day-number">${day}</a>`
               // }
               let _date = formatDate(item.date, 'yyyy-MM-dd').split('-')
-              let _dateF = calenderFormate.solar2lunar(
+              const _dateF = calenderFormate.solar2lunar(
                 _date[0],
                 _date[1],
                 _date[2]
               )
-              const subName = _dateF.festival
-                ? _dateF.festival
+              const festivalName = _dateF.lunarFestival || _dateF.festival
+              const subName = festivalName
+                ? festivalName
                 : _dateF.IDayCn === '初一'
                 ? _dateF.IMonthCn
                 : _dateF.IDayCn
@@ -238,6 +239,7 @@ export default {
         })
       })
       this.$message.success(`${year}节假日设置成功！`)
+      this.$refs.calendar.render()
     },
     addWeekend() {
       // const api = this.$refs.calendar.getApi()
@@ -265,14 +267,16 @@ export default {
       )
     }
   },
-  mounted() {}
+  mounted() {
+    // this.$refs.calendar.render()
+  }
 }
 </script>
 <style scoped>
 .calender-home {
-  width: 80%;
+  width: 95%;
   margin: 0 auto;
-  height: 80%;
+  height: 90%;
 }
 </style>
 <style>
@@ -309,4 +313,24 @@ export default {
   right: 10px;
   top: 5px;
 } */
+.fc-daygrid-day-top p {
+  width: 100%;
+}
+.fc-daygrid-day-top label {
+  width: calc(50% - 10px);
+  text-align: left;
+  display: inline-block;
+  margin-left: 10px;
+}
+.fc-daygrid-day-top span {
+  text-align: right;
+  display: inline-block;
+  width: calc(50% - 10px);
+  margin-right: 10px;
+  color: #7d8292;
+}
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #eaecf1;
+}
 </style>
