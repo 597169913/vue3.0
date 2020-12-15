@@ -27,7 +27,16 @@ export default {
       holidayTypes: ['假日', '周末'],
       name: '',
       type: '',
-      holidayNames: ['清明节', '端午节', '中秋节', '国庆节', '元旦', '周末']
+      holidayNames: [
+        '春节',
+        '清明节',
+        '劳动节',
+        '端午节',
+        '中秋节',
+        '国庆节',
+        '元旦',
+        '周末'
+      ]
     }
   },
   methods: {

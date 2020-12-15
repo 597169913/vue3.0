@@ -1,6 +1,6 @@
 <template>
   <div class="calender-home" :style="{height: height+ 'px'}">
-    <FullCalendar :options="calendarOptions" />
+    <FullCalendar :options="calendarOptions" ref="calendar" />
     <day-setting-dialog ref="settingDialog"></day-setting-dialog>
   </div>
 </template>
@@ -11,6 +11,9 @@ import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import moment from 'moment'
 import DaySettingDialog from './DaySettingDialog'
+
+import { calendar as calenderFormate } from './utils/calendar'
+import { formatDate } from './utils/dateTime'
 // import bootstrapPlugin from '@fullcalendar/bootstrap'
 
 export default {
@@ -36,22 +39,21 @@ export default {
           // 日历头部按钮位置
           left: 'prev,next',
           center: 'title',
-          right: 'today dayGridMonth,timeGridWeek,timeGridDay'
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
         footerToolbar: {
-          center: 'custom1 custom2 custom3 custom4'
+          center: 'custom1 custom2'
         },
-        firstDay: 1,
+        firstDay: 0, // 设置一周中显示的第一天是哪天，周日是0，周一是1，类推。,
         eventColor: '#3BB2E3',
+        aspectRatio: 1,
         initialDate: moment().format('YYYY-MM-DD'),
         eventLimit: true,
         buttonText: {
           today: '今天',
           month: '月',
           week: '周',
-          day: '日',
-          prev: '上一月',
-          next: '下一月'
+          day: '日'
         },
         slotLabelFormat: {
           hour: '2-digit',
@@ -61,15 +63,15 @@ export default {
         },
         customButtons: {
           custom1: {
-            text: '批量设置节假日',
+            text: '批量全年设置节假日',
             click: () => {
-              alert('clicked the custom1 button!')
+              this.addFestival()
             }
           },
           custom2: {
-            text: '批量设置周末',
+            text: '批量设置当前月的周末',
             click: () => {
-              alert('clicked the custom2 button!')
+              this.addWeekend()
             }
           },
           custom3: {
@@ -85,18 +87,47 @@ export default {
             }
           }
         },
+        allDayText: '全天',
+        views: {
+          dayGridMonth: {
+            displayEventTime: false, //是否显示时间
+            dayCellContent(item) {
+              // const day = new Date(item.date).getDate()
+              // return {
+              //   html: `<a class="fc-daygrid-day-number">${day}</a>`
+              // }
+              let _date = formatDate(item.date, 'yyyy-MM-dd').split('-')
+              let _dateF = calenderFormate.solar2lunar(
+                _date[0],
+                _date[1],
+                _date[2]
+              )
+              const subName = _dateF.festival
+                ? _dateF.festival
+                : _dateF.IDayCn === '初一'
+                ? _dateF.IMonthCn
+                : _dateF.IDayCn
+              return {
+                html: `<p id="${
+                  _dateF.festival ? 'holiday-item' : ''
+                }"><label>${_dateF.cDay}</label><span>${subName}</span></p>`
+              }
+            }
+          }
+        },
         selectMinDistance: 0,
         editable: true,
         selectable: true,
-        selectMirror: true,
+        selectMirror: false,
         dayMaxEvents: true,
         weekends: true,
         select: this.handleDateSelect,
+        dayClick: this.dayClick,
         eventClick: this.handleEventClick,
         eventsSet: this.handleEvents,
-        eventRender: this.handleEventRender,
         eventChange: this.handleEventChange,
-        eventContent: this.handleEventContent
+        eventContent: this.handleEventContent,
+        eventBackgroundColor: '#212121'
       },
       eventSources: {}
     }
@@ -140,11 +171,101 @@ export default {
       italicEl1.className = 'delete-btn'
       italicEl1.innerHTML = '删除'
       const arrayOfDomNodes = [italicEl, italicEl1]
+      italicEl1.onclick = evt => {
+        evt.stopPropagation()
+        arg.event.remove()
+      }
       return {
         domNodes: arrayOfDomNodes
       }
+    },
+    addFestival() {
+      const festival = [
+        { date: '1-1', title: '元旦节', holidays: 1 },
+        {
+          date: '12-30',
+          title: '春节',
+          holidays: 7,
+          isLunar: true
+        },
+        { date: '5-1', title: '劳动节', holidays: 3 },
+        { date: '5-5', title: '端午节', holidays: 1, isLunar: true },
+        { date: '8-15', title: '中秋节', holidays: 1, isLunar: true },
+        { date: '10-1', title: '国庆节', holidays: 7 }
+      ]
+      const datas = []
+      const calendarApi = this.$refs.calendar.getApi()
+      const year = new Date(calendarApi.currentData.currentDate).getFullYear()
+      festival.forEach(val => {
+        const strs = val.date.split('-')
+        const month = parseInt(strs[0])
+        const day = parseInt(strs[1])
+        const func = (year, month, startDay, title, holidays = 1) => {
+          const startTime = new Date(`${year}-${month}-${startDay}`)
+          for (let i = 0; i < holidays; i++) {
+            const time = new Date(startTime).getTime() + i * 1000 * 60 * 60 * 24
+            datas.push({
+              date: formatDate(new Date(time), 'yyyy-MM-dd'),
+              title
+            })
+          }
+        }
+        if (val.isLunar) {
+          // 农历节假日
+          let item = calenderFormate.lunar2solar(year, month, day)
+          if (item < 0 && val.title === '春节') {
+            // 考虑到除夕可能是在农历十二月二十九
+            item = calenderFormate.lunar2solar(year, month, day - 1)
+          }
+          func(item.cYear, item.cMonth, item.cDay, val.title, val.holidays)
+        } else {
+          func(year, month, day, val.title, val.holidays)
+        }
+      })
+      // 清明属于二十四节气
+      const qingming = calenderFormate.getTerm(year, 7)
+      datas.push({ date: `${year}-4-${qingming}`, title: '清明节' })
+      datas.forEach(val => {
+        calendarApi.addEvent({
+          id: this.getGuid(),
+          title: val.title,
+          start: new Date(val.date),
+          end: new Date(val.date),
+          allDay: true,
+          className: 'holiday',
+          color: 'red',
+          editable: true
+        })
+      })
+      this.$message.success(`${year}节假日设置成功！`)
+    },
+    addWeekend() {
+      // const api = this.$refs.calendar.getApi()
+      // const currentData = api.currentData
+      // const currentDate = new Date (api.currentData.currentDate)
+      // const year = currentDate.getFullYear()
+      // const month = currentDate.getMonth()
+    },
+    getGuid() {
+      const S4 = () =>
+        (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+      return (
+        S4() +
+        S4() +
+        '-' +
+        S4() +
+        '-' +
+        S4() +
+        '-' +
+        S4() +
+        '-' +
+        S4() +
+        S4() +
+        S4()
+      )
     }
-  }
+  },
+  mounted() {}
 }
 </script>
 <style scoped>
@@ -159,4 +280,33 @@ export default {
   position: absolute;
   right: 10px;
 }
+.fc-daygrid-day.fc-day-sat .fc-daygrid-day-number,
+.fc-daygrid-day.fc-day-sun .fc-daygrid-day-number {
+  color: red;
+}
+.fc-daygrid-day.fc-day-sat label,
+.fc-daygrid-day.fc-day-sun label {
+  color: red;
+}
+.fc-day-other a.holiday {
+  border-color: #2c3e50;
+  background-color: #2c3e50;
+}
+.fc-day-other.fc-day-sat .fc-daygrid-day-number,
+.fc-day-other.fc-day-sun .fc-daygrid-day-number {
+  color: #2c3e50;
+}
+.fc-daygrid-day:hover {
+  background-color: #f3f8fa;
+}
+/* .fc-daygrid-day label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+.fc-daygrid-day span {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+} */
 </style>
