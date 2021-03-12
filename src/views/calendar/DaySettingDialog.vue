@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :title="title" :visible="visible" @close="close">
+  <el-dialog :title="title" :visible="visible" @close="close" width="400px">
     <el-form ref="form" label-width="90px">
       <el-form-item label="节假日名称">
         <el-select v-model="name" @change="holidayChange">
