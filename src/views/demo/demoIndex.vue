@@ -1,15 +1,70 @@
 <template>
-  <div class="table">
-    <table></table>
-  </div>
+  <div id="container"></div>
 </template>
 <script>
 // import { fileViewBaseUrl } from 'api/fileview/file-view-service'
+import LogicFlow from '@logicflow/core';
 export default {
   data() {
     return {
-      visible: false,
-      filePath: 'localhost:8012/onlinePreview?url=http%3A%2F%2F10.0.7.8%3A8090%2Fupload%2FanalysisReport%2Ffa4630cf-e37b-e5fe-6ae5-cc62b9848e3a%2F%E6%96%B0%E5%BB%BA%20Microsoft%20Word%20%E6%96%87%E6%A1%A3_20211622151647.docx'
+      flowData: {
+        nodes: [
+          {
+            id: 50,
+            type: 'rect',
+            x: 100,
+            y: 150,
+            text: '你好',
+          },
+          {
+            id: 21,
+            type: 'circle',
+            x: 300,
+            y: 50,
+            text: '圆1'
+          },
+          {
+            id: 11,
+            type: 'circle',
+            x: 300,
+            y: 250,
+            text: '圆2'
+          },
+        ],
+        // 边
+        edges: [
+          {
+            type: 'polyline',
+            sourceNodeId: 50,
+            targetNodeId: 21,
+            startPoint: {
+              id: '50-150',
+              x: 150,
+              y: 160
+            },
+            endPoint: {
+              id: '150-50',
+              x: 300,
+              y: 110
+            }
+          },
+          {
+            type: 'polyline',
+            sourceNodeId: 50,
+            targetNodeId: 11,
+             startPoint: {
+              id: '50-150',
+              x: 150,
+              y: 160
+            },
+            endPoint: {
+              id: '150-50',
+              x: 300,
+              y: 210
+            }
+          }
+        ]
+      }
     }
   },
   methods: {
@@ -23,11 +78,23 @@ export default {
       console.log(filePath)
       this.filePath = filePath
     }
+  },
+  mounted() {
+    const lf = new LogicFlow({
+      container: document.querySelector('#container'),
+      stopScrollGraph: true,
+      stopZoomGraph: true,
+      grid: {
+        type: 'dot',
+        size: 20,
+      }
+    })
+    lf.render(this.flowData)
   }
 }
 </script>
 <style scoped>
-iframe {
+#container {
   width: 100%;
   height: 100%;
 }
