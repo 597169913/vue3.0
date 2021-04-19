@@ -6,6 +6,7 @@ import calendar from '../views/calendar/calendarIndex'
 import practice from '../views/practice/practiceIndex.vue'
 import docweb from '../views/document/docIndex'
 import demo from '../views/demo/demoIndex'
+import table from '../views/table/tableIndex'
 Vue.use(Router)
 export const appRounter = [
   {
@@ -31,6 +32,9 @@ export const appRounter = [
   {
     path: '/demo',
     component: demo
+  }, {
+    path: '/table',
+    component: table  
   }
 ]
 export default new Router({ routes: appRounter })

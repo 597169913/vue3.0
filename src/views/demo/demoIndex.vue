@@ -36,32 +36,32 @@ export default {
           {
             type: 'polyline',
             sourceNodeId: 50,
-            targetNodeId: 21,
-            startPoint: {
-              id: '50-150',
-              x: 150,
-              y: 160
-            },
-            endPoint: {
-              id: '150-50',
-              x: 300,
-              y: 110
-            }
+            targetNodeId: 21
+            // startPoint: {
+            //   id: '50-150',
+            //   x: 150,
+            //   y: 160
+            // },
+            // endPoint: {
+            //   id: '150-50',
+            //   x: 300,
+            //   y: 110
+            // }
           },
           {
             type: 'polyline',
             sourceNodeId: 50,
-            targetNodeId: 11,
-             startPoint: {
-              id: '50-150',
-              x: 150,
-              y: 160
-            },
-            endPoint: {
-              id: '150-50',
-              x: 300,
-              y: 210
-            }
+            targetNodeId: 11
+            // startPoint: {
+            //   id: '50-150',
+            //   x: 150,
+            //   y: 160
+            // },
+            // endPoint: {
+            //   id: '150-50',
+            //   x: 300,
+            //   y: 210
+            // }
           }
         ]
       }
@@ -87,6 +87,10 @@ export default {
       grid: {
         type: 'dot',
         size: 20,
+      },
+      snapline: {
+        stroke: '#1E90FF', // 对齐线颜色
+        strokeWidth: 1, // 对齐线宽度
       }
     })
     lf.render(this.flowData)
