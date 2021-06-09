@@ -14,6 +14,6 @@ Vue.config.productionTip = false
 Vue.use(VXETable)
 Vue.use(ElementUI)
 new Vue({
-  render: h => h(App),
-  router
+    render: h => h(App),
+    router
 }).$mount('#app')

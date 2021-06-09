@@ -7,34 +7,35 @@ import practice from '../views/practice/practiceIndex.vue'
 import docweb from '../views/document/docIndex'
 import demo from '../views/demo/demoIndex'
 import table from '../views/table/tableIndex'
+
 Vue.use(Router)
 export const appRounter = [
-  {
-    path: '/',
-    component: test
-  },
-  {
-    path: '/hello',
-    component: HelloWorld
-  },
-  {
-    path: '/calendar',
-    component: calendar
-  },
-  {
-    path: '/practice',
-    component: practice
-  },
-  {
-    path: '/docweb',
-    component: docweb
-  },
-  {
-    path: '/demo',
-    component: demo
-  }, {
-    path: '/table',
-    component: table  
-  }
+    {
+        path: '/',
+        component: test
+    },
+    {
+        path: '/hello',
+        component: HelloWorld
+    },
+    {
+        path: '/calendar',
+        component: calendar
+    },
+    {
+        path: '/practice',
+        component: practice
+    },
+    {
+        path: '/docweb',
+        component: docweb
+    },
+    {
+        path: '/demo',
+        component: demo
+    }, {
+        path: '/table',
+        component: table
+    }
 ]
-export default new Router({ routes: appRounter })
+export default new Router({routes: appRounter})

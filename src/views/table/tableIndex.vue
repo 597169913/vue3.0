@@ -1,17 +1,10 @@
 <template>
   <div class="vxe-table-demo">
-    <vxe-grid
-        ref="xGrid"
-        border
-        show-all-overflow
-        show-header-all-overflow
-        :height="height"
-        :columns="tableColumn"
-        :data="tableData"
-        :cell-class-name="handleCellClassName"
-        :header-cell-class-name="handleHeaderCellClassName"
-        @header-cell-click="headerCellClickEvent">
-      </vxe-grid>
+   <vxe-table>
+     <vxe-table-column></vxe-table-column>
+   </vxe-table>
+    <!-- <vxe-grid ref="xGrid" border align="center"   :scroll-y="{gt: 100}" show-all-overflow show-header-all-overflow :height="height" :columns="tableColumn"  @header-cell-click="headerCellClickEvent">
+    </vxe-grid> -->
   </div>
 </template>
 <script>
@@ -26,24 +19,38 @@ export default {
     }
   },
   created() {
-    const colSize = 1000
-    const rowSize = 1000
+    // const colSize = 1000
+    console.time()
+    const rowSize = 30
     const tableColumn = []
     const tableData = []
-    for(let index = 0; index < colSize; index++){
+    // const avg = 10
+    for (let i = 0; i < 10; i++) {
+      const children = []
+      for (let index = 0; index < 100; index++) {
+        children.push(
+          {
+            field: 'key_' + (i * 100 + index),
+            title: 'Col_' + (i * 100 + index),
+            width: 160
+          }
+        )
+      }
       tableColumn.push({
-        field: 'key_' + index,
-        title: 'Col_' + index,
-        width: 160
+        title: 'FirstCol_' + i,
+        children
       })
     }
-    for(let index = 0; index < rowSize; index++){
+    for (let index = 0; index < rowSize; index++) {
       const item = {}
-      tableColumn.forEach(function(column) {
-        item[column.field] = 'Value_' + index
+      tableColumn.forEach((val, tindex) => {
+        val.children.forEach((column, i) => {
+          item[column.field] = 'Value_' + (tindex * 100 + i)
+        })
       })
       tableData.push(item)
     }
+    console.log(tableColumn)
     this.tableColumn = tableColumn
     this.tableData = tableData
   },
@@ -70,10 +77,10 @@ export default {
     }
   },
   mounted() {
-    // if (this.$refs.xGrid) {
-    //   this.$refs.xGrid.reloadData(this.tableData)
-    // }
-    // console.timeEnd()
+    if (this.$refs.xGrid) {
+      this.$refs.xGrid.reloadData(this.tableData)
+    }
+    console.timeEnd()
   }
 }
 </script>
