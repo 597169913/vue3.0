@@ -4,7 +4,7 @@ import test from '../views/Test'
 import HelloWorld from '../components/HelloWorld'
 import calendar from '../views/calendar/calendarIndex'
 import practice from '../views/practice/practiceIndex.vue'
-import docweb from '../views/document/docIndex'
+// import docweb from '../views/document/docIndex'
 import demo from '../views/demo/demoIndex'
 import table from '../views/table/tableIndex'
 
@@ -26,10 +26,10 @@ export const appRounter = [
         path: '/practice',
         component: practice
     },
-    {
-        path: '/docweb',
-        component: docweb
-    },
+    // {
+    //     path: '/docweb',
+    //     component: docweb
+    // },
     {
         path: '/demo',
         component: demo

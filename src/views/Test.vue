@@ -296,7 +296,7 @@ export default {
     }
   },
   mounted() {
-    const map = L.map('map').setView([34.2212, 113.8196], 5)
+    const map = L.map('map', {attributionControl: false}).setView([34.2212, 113.8196], 5)
     // const myRenderer = L.canvas({ padding: 0.5 })
     // const marker = L.circle([34.2212, 113.8196], { renderer: myRenderer })
     // marker.addTo(map)
