@@ -9,7 +9,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 export default {
   data() {
     return {
-      width: 1500,
+      width: 1000,
       height: 800
     }
   },
@@ -19,20 +19,14 @@ export default {
       this.setCamera()
       this.setRenderer()
       this.setLight()
-      // const geometry = new THREE.BoxGeometry()
-      // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-      // this.cube = new THREE.Mesh(geometry, material)
-      // this.scene.add(this.cube)
-      // this.render()
-      // this.animate()
-      // this.addHelper()
       this.initMap()
-      this.render()
       this.setController()
+      this.setRaycaster()
+      this.animate()
     },
     setCamera() {
       this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 1000)
-      this.camera.position.z = 50
+      this.camera.position.z = 80
     },
     // 设置渲染器
     setRenderer() {
@@ -47,6 +41,7 @@ export default {
       const ambientLight = new THREE.AmbientLight(0xffffff) // 环境光
       this.scene.add(ambientLight)
     },
+    // 设置控制器
     setController() {
       this.controls = new OrbitControls(this.camera, this.renderer.domElement)
       // 动态阻尼系数 就是鼠标拖拽旋转灵敏度，阻尼越小越灵敏
@@ -69,18 +64,32 @@ export default {
       this.controls.enableRotate = true
       // this.controls.addEventListener('change', this.render())
     },
-    addHelper() {
-      const helper = new THREE.CameraHelper(this.camera)
-      this.scene.add(helper)
-    },
-    render() {
-      this.renderer.render(this.scene, this.camera)
+    setRaycaster() {
+      this.raycaster = new THREE.Raycaster()
+      this.mouse = new THREE.Vector2()
+      const onMouseMove = evt => {
+        // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+        this.mouse.x = (evt.clientX / this.width) / 2 - 1
+        this.mouse.x = (evt.clientY / this.height) / 2 + 1
+      }
+      window.addEventListener('mousemove', onMouseMove, false)
     },
     animate() {
-      requestAnimationFrame(this.animate.bind(this))
-      this.cube.rotation.x += 0.01
-      this.cube.rotation.y += 0.01
-      this.render()
+      window.requestAnimationFrame(this.animate.bind(this))
+      // 通过摄像机和鼠标位置更新射线
+      this.raycaster.setFromCamera(this.mouse, this.camera)
+      if (this.map) {
+        // 计算物体和射线的焦点
+        const interserct = this.raycaster.intersectObjects(this.map.children, true)
+        interserct.forEach(val => {
+          if (val.object.material && val.object.material.length > 0) {
+            val.object.material[0].color.set(0xff0000)
+            val.object.material[1].color.set(0xff0000)
+          }
+        })
+      }
+      this.controls.update()
+      this.renderer.render(this.scene, this.camera)
     },
     initMap() {
       this.map = new THREE.Object3D()
