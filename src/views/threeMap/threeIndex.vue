@@ -1,5 +1,8 @@
 <template>
-  <div id="three-map" :style="{width: width + 'px', height: height + 'px'}"></div>
+  <div
+    id="three-map"
+    :style="{width: width + 'px', height: height + 'px'}"
+  ></div>
 </template>
 <script>
 import * as THREE from 'three'
@@ -10,7 +13,7 @@ export default {
   data() {
     return {
       width: 1000,
-      height: 800
+      height: document.documentElement.clientHeight - 100
     }
   },
   methods: {
@@ -70,7 +73,7 @@ export default {
       const onMouseMove = evt => {
         // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
         this.mouse.x = (evt.clientX / this.width) / 2 - 1
-        this.mouse.x = (evt.clientY / this.height) / 2 + 1
+        this.mouse.y = -(evt.clientY / this.height) / 2 + 1
       }
       window.addEventListener('mousemove', onMouseMove, false)
     },
@@ -87,6 +90,18 @@ export default {
             val.object.material[1].color.set(0xff0000)
           }
         })
+        if (this.lastPick) {
+          this.lastPick.object.material[0].color.set('#2defff')
+          this.lastPick.object.material[1].color.set('#3480C4')
+        }
+        this.lastPick = null
+        this.lastPick = interserct.find(
+          (item) => item.object.material && item.object.material.length === 2
+        )
+        if (this.lastPick) {
+          this.lastPick.object.material[0].color.set(0xff0000)
+          this.lastPick.object.material[1].color.set(0xff0000)
+        }
       }
       this.controls.update()
       this.renderer.render(this.scene, this.camera)
@@ -135,7 +150,6 @@ export default {
               func(polygon)
             })
           }
-
         })
         province.properties = val.properties
         if (val.properties.centroid) {

@@ -1,18 +1,61 @@
 <template>
   <div class="hello">
     <div class="draw-btns">
-      <el-button size="small" @click="draw('line')">折线</el-button>
-      <el-button size="small" @click="draw('rectangle')">矩形</el-button>
-      <el-button size="small" @click="draw('polygon')">多边形</el-button>
-      <el-button size="small" @click="draw('parallelogram')">平行四边形</el-button>
-      <el-button size="small" @click="draw('regularPolygon')">正多边形</el-button>
-      <el-button size="small" @click="draw('circle')">圆</el-button>
-      <el-button size="small" @click="draw('ellipse')">椭圆</el-button>
-      <el-button size="small" @click="draw('bezier')">贝塞尔曲线</el-button>
-      <el-button size="small" @click="draw('commonArrow')">普通箭头</el-button>
-      <el-button size="small" @click="clear">清除</el-button>
+      <el-button
+        size="small"
+        @click="draw('line')"
+      >折线</el-button>
+      <el-button
+        size="small"
+        @click="draw('rectangle')"
+      >矩形</el-button>
+      <el-button
+        size="small"
+        @click="draw('polygon')"
+      >多边形</el-button>
+      <el-button
+        size="small"
+        @click="draw('parallelogram')"
+      >平行四边形</el-button>
+      <el-button
+        size="small"
+        @click="draw('regularPolygon')"
+      >正多边形</el-button>
+      <el-button
+        size="small"
+        @click="draw('circle')"
+      >圆</el-button>
+      <el-button
+        size="small"
+        @click="draw('ellipse')"
+      >椭圆</el-button>
+      <el-button
+        size="small"
+        @click="draw('bezier')"
+      >贝塞尔曲线</el-button>
+      <el-button
+        size="small"
+        @click="draw('commonArrow')"
+      >普通箭头</el-button>
+      <el-button
+        size="small"
+        @click="clear"
+      >清除</el-button>
     </div>
     <div id="map"></div>
+    <div
+      class="drag-box"
+      @mousedown="mousedown"
+    >
+      <span>测试拖动</span>
+    </div>
+    <div
+      class="drag-box1"
+      @mousemove="mousemove1"
+      @mousedown="mousedown1"
+    >
+      <span>测试拉伸</span>
+    </div>
   </div>
 </template>
 
@@ -25,11 +68,12 @@ import MapEvent from 'views/base/MapEvent'
 // import Vector from './draw/Vector'
 // import Curve from './draw/Curve'
 import CanvasLayer from './layer/CanvasLayer'
+import $ from 'jquery'
 export default {
   props: {
     msg: String
   },
-  data() {
+  data () {
     return {
       map: null,
       fetures: [],
@@ -37,7 +81,7 @@ export default {
     }
   },
   methods: {
-    draw(drawType) {
+    draw (drawType) {
       this.map.doubleClickZoom.disable()
       this.map.dragging.disable()
       this.drawType = drawType
@@ -62,7 +106,7 @@ export default {
       }
       this.mapEvent.addEventHandler('mousemove', this.mouseMoveHandler)
     },
-    clickHandler(evt) {
+    clickHandler (evt) {
       const circleMarker = L.circleMarker(evt.latlng, { fillColor: '#fff', weight: 2, fillOpacity: 1, radius: 6 })
       circleMarker.addTo(this.featureGroup)
       const drawTypes = ['rectangle', 'circle', 'parallelogram', 'ellipse', 'commonArrow']
@@ -76,15 +120,15 @@ export default {
       }
       this.clickedPoints.push(evt.latlng)
     },
-    mouseDownHandler(evt) {
+    mouseDownHandler (evt) {
       this.startPoint = evt.latlng
     },
-    mouseUpHandler() {
+    mouseUpHandler () {
       if (this.drawType === 'rectangle') {
         this.drop()
       }
     },
-    mouseMoveHandler(evt) {
+    mouseMoveHandler (evt) {
       const points = [...this.clickedPoints]
       points.push(evt.latlng)
       const crs = this.map.options.crs
@@ -253,13 +297,13 @@ export default {
           break
       }
     },
-  getGuid() {
-    const S4 = () => {
-      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    }
-    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-  },
-    addPolyline(points, groupLayer) {
+    getGuid () {
+      const S4 = () => {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+      }
+      return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+    },
+    addPolyline (points, groupLayer) {
       if (!this.polyline) {
         this.polyline = L.polyline(points, { color: '#f00', weight: 3, renderer: this.myRenderer }).addTo(groupLayer)
       } else {
@@ -269,12 +313,12 @@ export default {
     // drawArrow(ctx, startX, startY, endX, endY, angle) {
 
     // },
-    dbClickHandler() {
+    dbClickHandler () {
       this.clickedPoints.pop()
       // this.canvasLayer._setPoints(this.clickedPoints)
       this.drop()
     },
-    drop() {
+    drop () {
       this.onAttach = false
       this.startPoint = null
       this.mapEvent.deactive()
@@ -288,15 +332,214 @@ export default {
         this.featureGroup.removeLayer(val)
       })
     },
-    clear() {
+    clear () {
       const layers = this.layerGroup.getLayers()
       layers.forEach(val => {
         this.layerGroup.removeLayer(val)
       })
+    },
+    mousedown (event) {
+      const $dragDom = $(this.$el).find('.drag-box')
+      $dragDom.css({ cursor: 'move' })
+      $dragDom[0].style.cursor = 'move'
+      const dragDomOffsetLeft = $dragDom.offset().left
+      const dragDomOffsetTop = $dragDom.offset().top
+      const distanceX = event.clientX - dragDomOffsetLeft
+      const distanceY = event.clientY - dragDomOffsetTop
+      const screenWidth = document.documentElement.clientWidth
+      const screenHeight = document.documentElement.clientHeight
+      const dragDomWidth = $dragDom.outerWidth()
+      const dragDomHeight = $dragDom.outerHeight()
+      const minDragDomLeft = 0
+      const minDragDomTop = 0
+      let maxDragDomLeft = screenWidth - dragDomWidth - minDragDomLeft
+      let maxDragDomTop = screenHeight - dragDomHeight - minDragDomTop
+      document.onmousemove = ev => {
+        const oevent = ev || event
+        let left = oevent.clientX - distanceX
+        let top = oevent.clientY - distanceY
+        // 边界处理
+        if (left < minDragDomLeft) {
+          left = minDragDomLeft
+        } else if (left > maxDragDomLeft) {
+          left = maxDragDomLeft
+        }
+
+        if (top < minDragDomTop) {
+          top = minDragDomTop
+        } else if (top > maxDragDomTop) {
+          top = maxDragDomTop
+        }
+        $dragDom.css({
+          // width: newWidth + 'px',
+          // height: newHeight + 'px',
+          left: left + 'px',
+          top: top + 'px'
+          // cursor: this.getCursorType(direction)
+        })
+      }
+      document.onmouseup = function () {
+        document.onmousemove = null
+        document.onmouseup = null
+        $dragDom.css({
+          cursor: 'default'
+        })
+      }
+    },
+    getCursorType (direction) {
+      const CURSORTYPE = {
+        top: 'n-resize',
+        bottom: 's-resize',
+        left: 'w-resize',
+        right: 'e-resize',
+        right_top: 'ne-resize', // right_top写法是便于后面代码数据处理
+        left_top: 'nw-resize',
+        left_bottom: 'sw-resize',
+        right_bottom: 'se-resize',
+        default: 'default',
+      }
+      return CURSORTYPE[direction]
+    },
+    mousemove1 (e) {
+      const $dragDom = $(this.$el).find('.drag-box1')
+      const x = e.clientX
+      const y = e.clientY
+      const left = $dragDom.offset().left
+      const top = $dragDom.offset().top
+      const width = $dragDom.outerWidth()
+      const height = $dragDom.outerHeight()
+      // this.type = this.checkType($dragDom[0], x, y, left, top, width, height)
+      // $dragDom[0].style.cursor = this.getCursorType(this.type) || 'default'
+      if (!this.isMoving) {
+        this.type = this.checkType($dragDom[0], x, y, left, top, width, height)
+        $dragDom[0].style.cursor = this.getCursorType(this.type) || 'default'
+      }
+    },
+    // 判断鼠标悬浮指针类型
+    checkType (el, x, y, left, top, width, height) {
+      let type
+      const margin = 15
+      if (x > left + width - margin && el.scrollTop + y <= top + height - margin && top + margin <= y) {
+        type = 'right'
+      }
+      else if (left + margin > x && el.scrollTop + y <= top + height - margin && top + margin <= y) {
+        type = 'left'
+      } else if (el.scrollTop + y > top + height - margin && x <= left + width - margin && left + margin <= x) {
+        type = 'bottom'
+      } else if (top + margin > y && x <= left + width - margin && left + margin <= x) {
+        type = 'top'
+      } else if (x > left + width - margin && el.scrollTop + y > top + height - margin) {
+        type = 'right_bottom'
+      } else if (left + margin > x && el.scrollTop + y > top + height - margin) {
+        type = 'left_bottom'
+      } else if (top + margin > y && x > left + width - margin) {
+        type = 'right_top'
+      } else if (top + margin > y && left + margin > x) {
+        type = 'left_top'
+      }
+      return type || 'default'
+    },
+    mousedown1 (e) {
+      const $dragDom = $(this.$el).find('.drag-box1')
+      const x = e.clientX
+      const y = e.clientY
+      const width = $dragDom.outerWidth()
+      const height = $dragDom.outerHeight()
+      const left = $dragDom.offset().left
+      const top = $dragDom.offset().top
+      const screenWidth = document.documentElement.clientWidth || document.body.clientWidth
+      const screenHeight = document.documentElement.clientHeight || document.body.clientHeight
+      this.type = this.checkType($dragDom[0], x, y, left, top, width, height)
+      $dragDom[0].style.cursor = this.getCursorType(this.type) || 'default'
+      this.isMoving = true
+      document.onmousemove = e => {
+        // 移动时禁用默认事件
+        e.preventDefault()
+        let endX = e.clientX
+        let endY = e.clientY
+        let diffX = endX - x
+        let diffY = endY - y
+        let arr
+        // 将type转换为数组格式，简化代码判断调用即可
+        if (this.type) {
+          if (this.type.indexOf('_') == -1) {
+            arr = [this.type, '']
+          } else {
+            arr = this.type.split('_')
+          }
+          this.boundaryLimit({ left, top, width, height, diffX, diffY, screenHeight, screenWidth, arr })
+        }
+      }
+      // 拉伸结束
+      document.onmouseup = () => {
+        document.onmousemove = null
+        document.onmouseup = null
+        this.type = ''
+        this.isMoving = false
+        $dragDom[0].style.cursor = 'default'
+      }
+    },
+    // 判断边界条件
+    boundaryLimit (obj) {
+      const $dragDom = $(this.$el).find('.drag-box1')
+      const dragDom = $dragDom[0]
+      const marginLeft = $dragDom.outerWidth() - $dragDom.width()
+      const marginTop = $dragDom.outerHeight() - $dragDom.height()
+      const { left, top, width, height, diffX, diffY, screenHeight, screenWidth, arr } = obj
+      if (arr[0] === 'right' || arr[1] === 'right') {
+        if (width + diffX > screenWidth - left) {
+          dragDom.style.width = screenWidth - left + 'px'
+        } else {
+          dragDom.style.width = width + diffX + 'px'
+        }
+      }
+      if (arr[0] === 'left' || arr[1] === 'left') {
+        if (width - diffX > width + left) {
+          dragDom.style.width = width + left + 'px'
+          dragDom.style.left = - parseInt(marginLeft) + 'px'
+        } else {
+          dragDom.style.width = width - diffX + 'px'
+          // left实际 = left + marginLeft 计算时需要将marginLeft减掉
+          dragDom.style.left = left + diffX - parseInt(marginLeft) + 'px'
+        }
+      }
+      if (arr[0] === 'top' || arr[1] === 'top') {
+        if (height - diffY > height + top) {
+          dragDom.style.height = height + top + 'px'
+          dragDom.style.top = - parseInt(marginTop) + 'px'
+        } else {
+          dragDom.style.height = height - diffY + 'px'
+          // top实际 = top + marginTop 计算时需要将marginTop减掉
+          dragDom.style.top = top + diffY - parseInt(marginTop) + 'px'
+        }
+      }
+      if (arr[0] === 'bottom' || arr[1] === 'bottom') {
+        if (height + diffY > screenHeight - top) {
+          dragDom.style.height = screenHeight - top
+        } else {
+          dragDom.style.height = height + diffY + 'px'
+        }
+      }
+      if (arr[0] === 'default') {
+        // let left = x - diffX
+        // let top = y - diffY
+        // // 边界处理
+        // if (x < diffX) {
+        //   left = 0
+        // } else if (left > maxDragDomLeft) {
+        //   left = maxDragDomLeft
+        // }
+
+        // if (top < minDragDomTop) {
+        //   top = minDragDomTop
+        // } else if (top > maxDragDomTop) {
+        //   top = maxDragDomTop
+        // }
+      }
     }
   },
-  mounted() {
-    const map = L.map('map', {attributionControl: false}).setView([34.2212, 113.8196], 5)
+  mounted () {
+    const map = L.map('map', { attributionControl: false }).setView([34.2212, 113.8196], 5)
     // const myRenderer = L.canvas({ padding: 0.5 })
     // const marker = L.circle([34.2212, 113.8196], { renderer: myRenderer })
     // marker.addTo(map)
@@ -320,7 +563,29 @@ export default {
 <style scoped>
 #map {
   width: 1000px;
-  height: 800px;
+  height: 500px;
   margin: 0 auto;
+}
+.drag-box {
+  position: absolute;
+  right: 20px;
+  bottom: 50px;
+  height: 180px;
+  width: 200px;
+  z-index: 99999;
+  border: 1px solid #ccc;
+  background-color: wheat;
+  display: inline-block;
+}
+.drag-box1 {
+  position: absolute;
+  left: 100px;
+  bottom: 50px;
+  height: 180px;
+  width: 200px;
+  z-index: 99999;
+  border: 1px solid #ccc;
+  background-color: wheat;
+  display: inline-block;
 }
 </style>
