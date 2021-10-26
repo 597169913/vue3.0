@@ -8,6 +8,7 @@ import practice from '../views/practice/practiceIndex.vue'
 import demo from '../views/demo/demoIndex'
 import table from '../views/table/tableIndex'
 import threeIndex from 'views/threeMap/threeIndex'
+import cesiumDemo from 'views/cesiumDemo/cesiumIndex'
 
 Vue.use(Router)
 export const appRounter = [
@@ -41,6 +42,10 @@ export const appRounter = [
   {
     path: '/threemap',
     component: threeIndex
+  },
+  {
+    path: '/cesiumDemo',
+    component: cesiumDemo
   }
 ]
 export default new Router({ routes: appRounter })

@@ -49,13 +49,14 @@
     >
       <span>测试拖动</span>
     </div>
-    <div
+    <!-- <div
       class="drag-box1"
       @mousemove="mousemove1"
       @mousedown="mousedown1"
     >
       <span>测试拉伸</span>
-    </div>
+    </div> -->
+    <drag-dialog></drag-dialog>
   </div>
 </template>
 
@@ -69,11 +70,15 @@ import MapEvent from 'views/base/MapEvent'
 // import Curve from './draw/Curve'
 import CanvasLayer from './layer/CanvasLayer'
 import $ from 'jquery'
+import DragDialog from './DragDialog.vue'
 export default {
   props: {
     msg: String
   },
-  data () {
+  components: {
+    DragDialog
+  },
+  data() {
     return {
       map: null,
       fetures: [],
@@ -384,157 +389,6 @@ export default {
         $dragDom.css({
           cursor: 'default'
         })
-      }
-    },
-    getCursorType (direction) {
-      const CURSORTYPE = {
-        top: 'n-resize',
-        bottom: 's-resize',
-        left: 'w-resize',
-        right: 'e-resize',
-        right_top: 'ne-resize', // right_top写法是便于后面代码数据处理
-        left_top: 'nw-resize',
-        left_bottom: 'sw-resize',
-        right_bottom: 'se-resize',
-        default: 'default',
-      }
-      return CURSORTYPE[direction]
-    },
-    mousemove1 (e) {
-      const $dragDom = $(this.$el).find('.drag-box1')
-      const x = e.clientX
-      const y = e.clientY
-      const left = $dragDom.offset().left
-      const top = $dragDom.offset().top
-      const width = $dragDom.outerWidth()
-      const height = $dragDom.outerHeight()
-      // this.type = this.checkType($dragDom[0], x, y, left, top, width, height)
-      // $dragDom[0].style.cursor = this.getCursorType(this.type) || 'default'
-      if (!this.isMoving) {
-        this.type = this.checkType($dragDom[0], x, y, left, top, width, height)
-        $dragDom[0].style.cursor = this.getCursorType(this.type) || 'default'
-      }
-    },
-    // 判断鼠标悬浮指针类型
-    checkType (el, x, y, left, top, width, height) {
-      let type
-      const margin = 15
-      if (x > left + width - margin && el.scrollTop + y <= top + height - margin && top + margin <= y) {
-        type = 'right'
-      }
-      else if (left + margin > x && el.scrollTop + y <= top + height - margin && top + margin <= y) {
-        type = 'left'
-      } else if (el.scrollTop + y > top + height - margin && x <= left + width - margin && left + margin <= x) {
-        type = 'bottom'
-      } else if (top + margin > y && x <= left + width - margin && left + margin <= x) {
-        type = 'top'
-      } else if (x > left + width - margin && el.scrollTop + y > top + height - margin) {
-        type = 'right_bottom'
-      } else if (left + margin > x && el.scrollTop + y > top + height - margin) {
-        type = 'left_bottom'
-      } else if (top + margin > y && x > left + width - margin) {
-        type = 'right_top'
-      } else if (top + margin > y && left + margin > x) {
-        type = 'left_top'
-      }
-      return type || 'default'
-    },
-    mousedown1 (e) {
-      const $dragDom = $(this.$el).find('.drag-box1')
-      const x = e.clientX
-      const y = e.clientY
-      const width = $dragDom.outerWidth()
-      const height = $dragDom.outerHeight()
-      const left = $dragDom.offset().left
-      const top = $dragDom.offset().top
-      const screenWidth = document.documentElement.clientWidth || document.body.clientWidth
-      const screenHeight = document.documentElement.clientHeight || document.body.clientHeight
-      this.type = this.checkType($dragDom[0], x, y, left, top, width, height)
-      $dragDom[0].style.cursor = this.getCursorType(this.type) || 'default'
-      this.isMoving = true
-      document.onmousemove = e => {
-        // 移动时禁用默认事件
-        e.preventDefault()
-        let endX = e.clientX
-        let endY = e.clientY
-        let diffX = endX - x
-        let diffY = endY - y
-        let arr
-        // 将type转换为数组格式，简化代码判断调用即可
-        if (this.type) {
-          if (this.type.indexOf('_') == -1) {
-            arr = [this.type, '']
-          } else {
-            arr = this.type.split('_')
-          }
-          this.boundaryLimit({ left, top, width, height, diffX, diffY, screenHeight, screenWidth, arr })
-        }
-      }
-      // 拉伸结束
-      document.onmouseup = () => {
-        document.onmousemove = null
-        document.onmouseup = null
-        this.type = ''
-        this.isMoving = false
-        $dragDom[0].style.cursor = 'default'
-      }
-    },
-    // 判断边界条件
-    boundaryLimit (obj) {
-      const $dragDom = $(this.$el).find('.drag-box1')
-      const dragDom = $dragDom[0]
-      const marginLeft = $dragDom.outerWidth() - $dragDom.width()
-      const marginTop = $dragDom.outerHeight() - $dragDom.height()
-      const { left, top, width, height, diffX, diffY, screenHeight, screenWidth, arr } = obj
-      if (arr[0] === 'right' || arr[1] === 'right') {
-        if (width + diffX > screenWidth - left) {
-          dragDom.style.width = screenWidth - left + 'px'
-        } else {
-          dragDom.style.width = width + diffX + 'px'
-        }
-      }
-      if (arr[0] === 'left' || arr[1] === 'left') {
-        if (width - diffX > width + left) {
-          dragDom.style.width = width + left + 'px'
-          dragDom.style.left = - parseInt(marginLeft) + 'px'
-        } else {
-          dragDom.style.width = width - diffX + 'px'
-          // left实际 = left + marginLeft 计算时需要将marginLeft减掉
-          dragDom.style.left = left + diffX - parseInt(marginLeft) + 'px'
-        }
-      }
-      if (arr[0] === 'top' || arr[1] === 'top') {
-        if (height - diffY > height + top) {
-          dragDom.style.height = height + top + 'px'
-          dragDom.style.top = - parseInt(marginTop) + 'px'
-        } else {
-          dragDom.style.height = height - diffY + 'px'
-          // top实际 = top + marginTop 计算时需要将marginTop减掉
-          dragDom.style.top = top + diffY - parseInt(marginTop) + 'px'
-        }
-      }
-      if (arr[0] === 'bottom' || arr[1] === 'bottom') {
-        if (height + diffY > screenHeight - top) {
-          dragDom.style.height = screenHeight - top
-        } else {
-          dragDom.style.height = height + diffY + 'px'
-        }
-      }
-      if (arr[0] === 'default') {
-        // let left = x - diffX
-        // let top = y - diffY
-        // // 边界处理
-        // if (x < diffX) {
-        //   left = 0
-        // } else if (left > maxDragDomLeft) {
-        //   left = maxDragDomLeft
-        // }
-
-        // if (top < minDragDomTop) {
-        //   top = minDragDomTop
-        // } else if (top > maxDragDomTop) {
-        //   top = maxDragDomTop
-        // }
       }
     }
   },

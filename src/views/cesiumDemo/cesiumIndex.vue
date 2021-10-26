@@ -49,14 +49,23 @@ export default {
       tileMatrixSetID: "GoogleMapsCompatible",
       show: false
     }))
+    // 增加行政区服务
+    // viewer.imageryLayers.addImageryProvider(new Cesium.ArcGisMapServerImageryProvider({
+    //   url: "http://t0.tianditu.com/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default.jpg&tk=6224bf8cd1e456a8692bba30318fe7b3",
+    //   layer: "tdtAnnoLayer",
+    //   style: "default",
+    //   format: "image/jpeg",
+    //   tileMatrixSetID: "GoogleMapsCompatible",
+    //   show: false
+    // }))
     // fly
     viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(103.84, 31.15, 17850000),
-      orientation: {
-        heading: Cesium.Math.toRadians(348.4202942851978),
-        pitch: Cesium.Math.toRadians(-89.74026687972041),
-        roll: Cesium.Math.toRadians(0)
-      }
+      destination: Cesium.Cartesian3.fromDegrees(103.84, 31.15, 17850000)
+      // orientation: {
+      //   heading: Cesium.Math.toRadians(348.4202942851978),
+      //   pitch: Cesium.Math.toRadians(0),
+      //   roll: Cesium.Math.toRadians(0)
+      // }
     })
     const options = {
       // 用于在使用重置导航重置地图视图时设置默认视图控制。接受的值是Cesium.Cartographic 和 Cesium.Rectangle.
@@ -72,6 +81,8 @@ export default {
     }
     options.defaultResetView = Cesium.Rectangle.fromDegrees(80, 22, 130, 50)
     CesiumNavigation(viewer, options)
+    console.log('viewer', viewer)
+    Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(90, -20, 110, 90);
   }
 }
 </script>
@@ -80,5 +91,15 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+</style>
+<style>
+.compass {
+  position: absolute;
+  left: 0px;
+}
+.navigation-controls {
+  position: absolute;
+  left: 30px;
 }
 </style>

@@ -1,10 +1,10 @@
 {
-  "name": "vue3",
+  "name": "demo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve && node ./copyCesiumlib.js",
+    "build": "node --max_old_space_size=4096 node_modules/@vue/cli-service/bin/vue-cli-service.js build --open",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -17,9 +17,13 @@
     "@fullcalendar/timegrid": "^5.4.0",
     "@fullcalendar/vue": "^5.4.0",
     "@logicflow/core": "^0.2.9",
+    "@terraformer/arcgis": "^2.1.0",
     "@tweenjs/tween.js": "^18.5.0",
     "axios": "^0.19.2",
     "bootstrap": "^4.5.3",
+    "cesium": "^1.85.0",
+    "cesium-navigation-es6": "^1.1.7",
+    "cesium-tdt": "^1.1.0",
     "core-js": "^3.4.4",
     "d3": "^7.0.0",
     "d3-geo": "^3.0.1",
@@ -34,8 +38,11 @@
     "leaflet-ellipse": "^0.9.1",
     "moment": "^2.29.1",
     "proj4": "^2.6.1",
+    "pubsub-js": "^1.9.3",
     "three": "^0.130.1",
     "vue": "^2.6.10",
+    "vue-drag-resize": "^1.5.4",
+    "vue-draggable-resizable": "^2.3.0",
     "vue-lunar-full-calendar": "^1.3.2",
     "vue-router": "^3.1.6",
     "vue-video-player": "^5.0.2",
@@ -44,6 +51,7 @@
     "xe-utils": "^3.1.13"
   },
   "devDependencies": {
+    "@open-wc/webpack-import-meta-loader": "^0.4.7",
     "@vue/cli-plugin-babel": "^4.1.0",
     "@vue/cli-plugin-eslint": "^4.1.0",
     "@vue/cli-service": "^4.1.0",
