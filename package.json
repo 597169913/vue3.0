@@ -19,7 +19,7 @@
     "@logicflow/core": "^0.2.9",
     "@terraformer/arcgis": "^2.1.0",
     "@tweenjs/tween.js": "^18.5.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.2",
     "bootstrap": "^4.5.3",
     "cesium": "^1.85.0",
     "cesium-navigation-es6": "^1.1.7",
