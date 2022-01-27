@@ -39,7 +39,7 @@
     "moment": "^2.29.1",
     "proj4": "^2.6.1",
     "pubsub-js": "^1.9.3",
-    "three": "^0.130.1",
+    "three": "^0.137.0",
     "vue": "^2.6.10",
     "vue-drag-resize": "^1.5.4",
     "vue-draggable-resizable": "^2.3.0",
