@@ -36,7 +36,7 @@
     "leaflet": "^1.6.0",
     "leaflet-canvas-geojson": "0.0.8",
     "leaflet-ellipse": "^0.9.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "proj4": "^2.6.1",
     "pubsub-js": "^1.9.3",
     "three": "^0.130.1",
